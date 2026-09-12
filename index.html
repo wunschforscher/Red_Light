@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#ff0000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Red Screen" />
+  <title>Red Screen</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #ff0000;
+      font-family: system-ui, sans-serif;
+    }
+    #screen {
+      position: fixed;
+      inset: 0;
+      background: rgb(255,0,0);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding:
+        env(safe-area-inset-top)
+        env(safe-area-inset-right)
+        calc(24px + env(safe-area-inset-bottom))
+        env(safe-area-inset-left);
+    }
+    #controls {
+      width: min(92vw, 520px);
+      background: rgba(0,0,0,.78);
+      border-radius: 18px;
+      padding: 16px;
+      color: #ff0000;
+      transition: opacity .2s ease;
+    }
+    #controls.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    label {
+      min-width: 72px;
+      font-size: 14px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: #ff0000;
+    }
+    button {
+      margin-top: 12px;
+      width: 100%;
+      border: 1px solid #ff0000;
+      background: #000;
+      color: #ff0000;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    #value {
+      min-width: 44px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+  <div id="screen">
+    <div id="controls">
+      <div class="row">
+        <label for="intensity">Red</label>
+        <input id="intensity" type="range" min="1" max="255" value="255" />
+        <span id="value">255</span>
+      </div>
+      <button id="hide">Hide controls</button>
+    </div>
+  </div>
+
+  <script>
+    const screen = document.getElementById('screen');
+    const controls = document.getElementById('controls');
+    const slider = document.getElementById('intensity');
+    const value = document.getElementById('value');
+    const hide = document.getElementById('hide');
+
+    function setRed(v) {
+      const n = Number(v);
+      screen.style.background = `rgb(${n},0,0)`;
+      document.body.style.background = `rgb(${n},0,0)`;
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', `rgb(${n},0,0)`);
+      value.textContent = n;
+      localStorage.setItem('redIntensity', n);
+    }
+
+    const saved = localStorage.getItem('redIntensity');
+    if (saved) slider.value = saved;
+    setRed(slider.value);
+
+    slider.addEventListener('input', e => setRed(e.target.value));
+
+    hide.addEventListener('click', e => {
+      e.stopPropagation();
+      controls.classList.add('hidden');
+    });
+
+    screen.addEventListener('click', () => {
+      controls.classList.toggle('hidden');
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) setRed(slider.value);
+    });
+  </script>
+</body>
+</html>
